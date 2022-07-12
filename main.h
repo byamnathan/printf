@@ -1,22 +1,40 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
+
+#include <stdlib.h>
+#include <unistd.h>
 #include <stdarg.h>
+#include <stdio.h>
+
+/**
+ * struct print - structure for printing various types
+ * @t: type to print
+ * @f: function to print
+ */
+typedef struct print
+{
+  char *t;
+  int (*f)(va_list);
+} print_t;
+
+/* _putchar */
 int _putchar(char c);
-void _puts(char *str);
-int _strlen(char *s);
+
+int arg_printer(va_list arg_ptr, const char *format);
+int print_str(va_list arg_ptr);
+int print_num(unsigned int n, int c);
+int print_int(va_list arg_ptr);
+int print_rot13(va_list arg_ptr);
+int print_u(va_list arg_ptr);
+int print_o(va_list arg_ptr);
+int print_b(va_list arg_ptr);
+int print_x(va_list arg_ptr);
+int print_X(va_list arg_ptr);
+int print_p(va_list arg_ptr);
+int print_S(va_list arg_ptr);
+int print_r(va_list arg_ptr);
+
+/* _printf */
 int _printf(const char *format, ...);
-char *convert_to(char representation[], unsigned int num, int base);
-int function_manager(char c, va_list arg);
-int _switch(char c, va_list arg);
-int print_character(va_list arg);
-int print_sign(va_list arg, int base);
-int print_unsign(va_list arg, int base);
-int print_string(va_list arg);
-int print_ptr(va_list arg);
-int print_rot13(va_list arg);
-int print_rev(va_list arg);
-int print_base16_upper_lower(va_list arg, char *representation);
-int loop_format(va_list arg, const char *string);
-int call_function_manager(char aux, va_list arg);
-int check_percent(int *flag, char aux);
+
 #endif
