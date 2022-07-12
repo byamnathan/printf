@@ -1,40 +1,39 @@
-#ifndef _MAIN_H_
-#define _MAIN_H_
-
-#include <stdlib.h>
-#include <unistd.h>
+#ifndef _main_h_
+#define _main_h_
 #include <stdarg.h>
+#include <unistd.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <limits.h>
+#include <stdlib.h>
 
 /**
- * struct print - structure for printing various types
- * @t: type to print
- * @f: function to print
+ * struct format - Struct that conteins the funtions printf
+ * to each format
+ * @frt: format
+ * @f: function associated
  */
-typedef struct print
+typedef struct format
 {
-  char *t;
-  int (*f)(va_list);
-} print_t;
+char *frt;
+int (*f)(va_list);
+} format_t;
 
-/* _putchar */
-int _putchar(char c);
-
-int arg_printer(va_list arg_ptr, const char *format);
-int print_str(va_list arg_ptr);
-int print_num(unsigned int n, int c);
-int print_int(va_list arg_ptr);
-int print_rot13(va_list arg_ptr);
-int print_u(va_list arg_ptr);
-int print_o(va_list arg_ptr);
-int print_b(va_list arg_ptr);
-int print_x(va_list arg_ptr);
-int print_X(va_list arg_ptr);
-int print_p(va_list arg_ptr);
-int print_S(va_list arg_ptr);
-int print_r(va_list arg_ptr);
-
-/* _printf */
 int _printf(const char *format, ...);
+int (*get_fun(char format))(va_list);
+int print_char(va_list str);
+int print_string(va_list str);
+char *_number_to_char(int n);
+int print_number(va_list number);
+int _char_to_number(char *str);
+int print_u_number(va_list number);
+int print_binary(va_list number);
+void reverse_array(char *str);
+int print_octal(va_list num);
+int print_revstr(va_list list);
+int print_root13(va_list string);
+int print_hexa(va_list number);
+int print_hexa_up(va_list number);
+int print_npchar(va_list string);
 
 #endif
