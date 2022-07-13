@@ -1,85 +1,124 @@
-#include <stdarg.h>
 #include "main.h"
-#include <stddef.h>
 
 /**
- * get_op - select function for conversion char
- * @c: char to check
- * Return: pointer to function
+ * check_buffer_overflow - if writing over buffer space,
+ * print everything then revert length back to 0 to write at buffer start
+ * @buffer: buffer holding string to print
+ * @len: position in buffer
+ * Return: length position
  */
-
-int (*get_op(const char c))(va_list)
+int check_buffer_overflow(char *buffer, int len)
 {
-int i = 0;
-
-flags_p fp[] = {
-		  {"c", print_char},
-		  {"s", print_str},
-		  {"i", print_nbr},
-		  {"d", print_nbr},
-		  {"b", print_binary},
-		  {"o", print_octal},
-		  {"x", print_hexa_lower},
-		  {"X", print_hexa_upper},
-		  {"u", print_unsigned},
-		  {"S", print_str_unprintable}
-		  {"r", print_str_reverse},
-		  {"p", print_ptr},
-		  {"R", print_rot13},
-		  {"%", print_percent}
-};
-while (i < 14)
-{
-if (c == fp[i].c[0])
-{
-return (fp[i].f);
-}
-i++;
-}
-return (NULL);
+	if (len > 1020)
+	{
+		write(1, buffer, len);
+		len = 0;
+	}
+	return (len);
 }
 
 /**
- * _printf - Reproduce behavior of printf function
- * @format: format string
- * Return: value of printed chars
+ * _printf - mini printf version
+ * @format: initial string with all identifiers
+ * Return: strings with identifiers expanded
  */
 int _printf(const char *format, ...)
 {
-va_list ap;
-int sum = 0, i = 0;
-int (*func)();
+	int len = 0, total_len = 0, i = 0, j = 0;
+	va_list list;
+	char *buffer, *str;
+	char* (*f)(va_list);
 
-if (!format || (format[0] == '%' && format[1] == '\0'))
-return (-1);
-va_start(ap, format);
+	if (format == NULL)
+		return (-1);
 
-while (format[i])
-{
-if (format[i] == '%')
-{
-if (format[i + 1] != '\0')
-func = get_op(format[i + 1]);
-if (func == NULL)
-{
-_putchar(format[i]);
-sum++;
-i++;
+	buffer = create_buffer();
+	if (buffer == NULL)
+		return (-1);
+
+	va_start(list, format);
+
+	while (format[i] != '\0')
+	{
+		if (format[i] != '%') /* copy format into buffer until '%' */
+		{
+			len = check_buffer_overflow(buffer, len);
+			buffer[len++] = format[i++];
+			total_len++;
+		}
+		else /* if %, find function */
+		{
+			i++;
+			if (format[i] == '\0') /* handle single ending % */
+			{
+				va_end(list);
+				free(buffer);
+				return (-1);
+			}
+			if (format[i] == '%') /* handle double %'s */
+			{
+				len = check_buffer_overflow(buffer, len);
+				buffer[len++] = format[i];
+				total_len++;
+			}
+			else
+			{
+				f = get_func(format[i]); /* grab function */
+				if (f == NULL)  /* handle fake id */
+				{
+					len = check_buffer_overflow(buffer, len);
+					buffer[len++] = '%'; total_len++;
+					buffer[len++] = format[i]; total_len++;
+				}
+				else /* return string, copy to buffer */
+				{
+					str = f(list);
+					if (str == NULL)
+					{
+						va_end(list);
+						free(buffer);
+						return (-1);
+					}
+					if (format[i] == 'c' && str[0] == '\0')
+					{
+						len = check_buffer_overflow(buffer, len);
+						buffer[len++] = '\0';
+						total_len++;
+					}
+					j = 0;
+					while (str[j] != '\0')
+					{
+						len = check_buffer_overflow(buffer, len);
+						buffer[len++] = str[j];
+						total_len++; j++;
+					}
+					free(str);
+				}
+			} i++;
+		}
+	}
+	write_buffer(buffer, len, list);
+	return (total_len);
 }
-else
+
+/**
+ * main - sample main program
+ * Return: 0 on sucess
+ */
+int main(void)
 {
-sum += func(ap);
-i += 2
-continue;
-}
-}
-else
-{
-_putchar(format[i]);
-sum++;
-i++;
-}
-}
-va_end(ap);
-return (sum);
+	_printf("\n\n\nHere's some examples of what you could do with this custom_printf function!\n\n\n");
+	sleep(1);
+	_printf("\nPrinting Strings, Characters, and Numbers...... %s %c%drld\n\n", "Hello", 'W', 0);
+	sleep(1);
+	_printf("Printing Reverse...... %r \n\n", "Hello");
+	sleep(1);
+	_printf("Printing Binary (base 2)...... %b \n\n", "Hello");
+	sleep(1);
+	_printf("Printing Octal (base 8)...... %o \n\n", "Hello");
+	sleep(1);
+	_printf("Printing Rot13 (encrypt)...... %R \n\n", "Hello");
+	sleep(1);
+	_printf("\n\n             = )                  \n\n\n");
+	return (0);
 }
